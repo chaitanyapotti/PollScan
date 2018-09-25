@@ -71,10 +71,14 @@ router.get('/events', function (req, res, next) {
             var contractInstance = new web3.eth.Contract(abi, votingContractAddress)
             global.contractInstances[votingContractAddress] = contractInstance
         }
-        var myEvents = contractInstance.getPastEvents({ fromBlock: 0, toBlock: 'latest' },
+        contractInstance.getPastEvents({ fromBlock: 0, toBlock: 'latest' },
             function (err, logs) {
-                if (err) { console.log(err) }
-                if (logs) {
+                if (err) { 
+                    console.log(err)
+                    res.status(500).json({ 'message': 'Failed', 'reason': err })
+                }
+                console.log('logs: ', logs)
+                if (logs.length>0) {
                     getFirstAndLastBlockTimeStamp = async () => {
                         let firstBlockDetails = await web3.eth.getBlock(logs[0]['blockNumber'])
                         let lastBlockDetails = await web3.eth.getBlock(logs[logs.length - 1]['blockNumber'])
@@ -104,6 +108,8 @@ router.get('/events', function (req, res, next) {
                     //         console.log(data)
                     //     })
                     // }
+                }else{
+                    res.json({ 'message': 'Failed', 'reason': 'No logs available at the moment.' })
                 }
             })
 
