@@ -237,7 +237,7 @@ router.get("/votetallies", function (req, res, next) {
                 console.error(err);
                 res.status(500).json({ message: "Failed", reason: err });
             }
-            res.json({ message: "Success", data: { votetallies: web3.utils.hexToAscii(result).replace(/\0/g, '') } });
+            res.json({ message: "Success", data: { votetallies: result} });
         });
     } else {
         res
