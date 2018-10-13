@@ -83,10 +83,11 @@ router.get("/events", function (req, res, next) {
                             m = 0
                             b = lastBlockDetails.timestamp
                         } else {
-                            m = (lastBlockDetails.timestamp - firstBlockDetails.timestamp) / (firstBlockDetails.number - lastBlockDetails.number)
+                            m = -(lastBlockDetails.timestamp - firstBlockDetails.timestamp) / (firstBlockDetails.number - lastBlockDetails.number)
                             b = lastBlockDetails.timestamp - m * lastBlockDetails.number
                         }
 
+                        
                         for (let log of logs) {
                             activitiesArray.push({
                                 type: log.event, weight: log.returnValues.voteWeight,
