@@ -1,5 +1,8 @@
 var express = require("express");
 var router = express.Router();
+var fs = require('fs');
+
+const pollscan_abi = JSON.parse(fs.readFileSync("./ABIs/pollScanABI.json"));
 // var votingContractAddress = '0xce7ab7093a056598c53b5d87082c7019eb2275db'
 
 /* Poll specific queries. */
@@ -9,7 +12,7 @@ router.get("/name", function (req, res, next) {
         if (votingContractAddress in global.contractInstances) {
             var contractInstance = global.contractInstances[votingContractAddress];
         } else {
-            var contractInstance = new web3.eth.Contract(abi, votingContractAddress);
+            var contractInstance = new web3.eth.Contract(pollscan_abi, votingContractAddress);
             global.contractInstances[votingContractAddress] = contractInstance;
         }
         contractInstance.methods.getName().call(function (err, result) {
@@ -35,7 +38,7 @@ router.get("/polltype", function (req, res, next) {
         if (votingContractAddress in global.contractInstances) {
             var contractInstance = global.contractInstances[votingContractAddress];
         } else {
-            var contractInstance = new web3.eth.Contract(abi, votingContractAddress);
+            var contractInstance = new web3.eth.Contract(pollscan_abi, votingContractAddress);
             global.contractInstances[votingContractAddress] = contractInstance;
         }
         contractInstance.methods.getPollType().call(function (err, result) {
@@ -61,7 +64,7 @@ router.get("/events", function (req, res, next) {
         if (votingContractAddress in global.contractInstances) {
             var contractInstance = global.contractInstances[votingContractAddress];
         } else {
-            var contractInstance = new web3.eth.Contract(abi, votingContractAddress);
+            var contractInstance = new web3.eth.Contract(pollscan_abi, votingContractAddress);
             global.contractInstances[votingContractAddress] = contractInstance;
         }
         contractInstance.getPastEvents({ fromBlock: "3000000", toBlock: 'latest' },
@@ -87,7 +90,7 @@ router.get("/events", function (req, res, next) {
                             b = lastBlockDetails.timestamp - m * lastBlockDetails.number
                         }
 
-                        
+
                         for (let log of logs) {
                             activitiesArray.push({
                                 type: log.event, weight: log.returnValues.voteWeight,
@@ -109,14 +112,14 @@ router.get("/events", function (req, res, next) {
                     res.json({ 'message': 'Failed', 'reason': 'No logs available at the moment.' })
                 }
             })
-    }else {
-    res
-        .status(500)
-        .json({
-            message: "Failed",
-            reason: "Contract Address is missing in the query"
-        });
-}
+    } else {
+        res
+            .status(500)
+            .json({
+                message: "Failed",
+                reason: "Contract Address is missing in the query"
+            });
+    }
 });
 
 router.get("/starttime", function (req, res, next) {
@@ -125,7 +128,7 @@ router.get("/starttime", function (req, res, next) {
         if (votingContractAddress in global.contractInstances) {
             var contractInstance = global.contractInstances[votingContractAddress];
         } else {
-            var contractInstance = new web3.eth.Contract(abi, votingContractAddress);
+            var contractInstance = new web3.eth.Contract(pollscan_abi, votingContractAddress);
             global.contractInstances[votingContractAddress] = contractInstance;
         }
         contractInstance.methods.getStartTime().call(function (err, result) {
@@ -151,7 +154,7 @@ router.get("/endtime", function (req, res, next) {
         if (votingContractAddress in global.contractInstances) {
             var contractInstance = global.contractInstances[votingContractAddress];
         } else {
-            var contractInstance = new web3.eth.Contract(abi, votingContractAddress);
+            var contractInstance = new web3.eth.Contract(pollscan_abi, votingContractAddress);
             global.contractInstances[votingContractAddress] = contractInstance;
         }
         contractInstance.methods.getEndTime().call(function (err, result) {
@@ -177,7 +180,7 @@ router.get("/totalvotes", function (req, res, next) {
         if (votingContractAddress in global.contractInstances) {
             var contractInstance = global.contractInstances[votingContractAddress];
         } else {
-            var contractInstance = new web3.eth.Contract(abi, votingContractAddress);
+            var contractInstance = new web3.eth.Contract(pollscan_abi, votingContractAddress);
             global.contractInstances[votingContractAddress] = contractInstance;
         }
         contractInstance.methods.getVoterBaseDenominator().call(function (err, result) {
@@ -204,7 +207,7 @@ router.get("/voterbaselogic", function (req, res, next) {
         if (votingContractAddress in global.contractInstances) {
             var contractInstance = global.contractInstances[votingContractAddress];
         } else {
-            var contractInstance = new web3.eth.Contract(abi, votingContractAddress);
+            var contractInstance = new web3.eth.Contract(pollscan_abi, votingContractAddress);
             global.contractInstances[votingContractAddress] = contractInstance;
         }
         contractInstance.methods.getVoterBaseLogic().call(function (err, result) {
@@ -230,7 +233,7 @@ router.get("/votetallies", function (req, res, next) {
         if (votingContractAddress in global.contractInstances) {
             var contractInstance = global.contractInstances[votingContractAddress];
         } else {
-            var contractInstance = new web3.eth.Contract(abi, votingContractAddress);
+            var contractInstance = new web3.eth.Contract(pollscan_abi, votingContractAddress);
             global.contractInstances[votingContractAddress] = contractInstance;
         }
         contractInstance.methods.getVoteTallies().call(function (err, result) {
@@ -238,7 +241,7 @@ router.get("/votetallies", function (req, res, next) {
                 console.error(err);
                 res.status(500).json({ message: "Failed", reason: err });
             }
-            res.json({ message: "Success", data: { votetallies: result} });
+            res.json({ message: "Success", data: { votetallies: result } });
         });
     } else {
         res
@@ -256,7 +259,7 @@ router.get("/proposalswithvotes", function (req, res, next) {
         if (votingContractAddress in global.contractInstances) {
             var contractInstance = global.contractInstances[votingContractAddress];
         } else {
-            var contractInstance = new web3.eth.Contract(abi, votingContractAddress);
+            var contractInstance = new web3.eth.Contract(pollscan_abi, votingContractAddress);
             global.contractInstances[votingContractAddress] = contractInstance;
         }
         contractInstance.methods.getProposals().call(function (err, result) {
