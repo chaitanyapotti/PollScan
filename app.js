@@ -20,7 +20,6 @@ web3 = new Web3(provider);
 global.contractInstances = {}
 
 var index = require('./routes/index');
-var users = require('./routes/users');
 var pollscan = require('./routes/pollscan');
 var entity = require('./routes/entity');
 var eoa  = require('./routes/eoa');
@@ -47,7 +46,6 @@ app.use(function (req, res, next) {
 });
 
 app.use('/', index);
-app.use('/users', users);
 app.use('/pollscan', pollscan);
 app.use('/entity', entity);
 app.use('/eoa', eoa);

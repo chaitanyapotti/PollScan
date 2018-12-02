@@ -13,22 +13,22 @@ const multer = Multer({
 const pollscan_abi = JSON.parse(fs.readFileSync("./ABIs/pollScanABI.json"));
 const entity_abi = JSON.parse(fs.readFileSync("./ABIs/entityABI.json"));
 
-const HDWalletProvider = require("truffle-hdwallet-provider");
-const Web3 = require('web3');
+// const HDWalletProvider = require("truffle-hdwallet-provider");
+// const Web3 = require('web3');
 // const testnet = `https://rinkeby.infura.io/v3/894765ed26c2470587b00e37249612e4`
-const testnet = 'http://localhost:8545'
+// const testnet = 'http://localhost:8545'
 
-const provider = new HDWalletProvider(
-    // "blue inherit drum enroll amused please camp false estate flash sell right", //potti's
-    // process.env.ACCOUNT_WORDS,
-      "rookie cross around replace trim garden before ancient manage arena bar rigid",
-    testnet
-);
+// const provider = new HDWalletProvider(
+//     // "blue inherit drum enroll amused please camp false estate flash sell right", //potti's
+//     // process.env.ACCOUNT_WORDS,
+//       "rookie cross around replace trim garden before ancient manage arena bar rigid",
+//     testnet
+// );
 
-web3 = new Web3(provider);
+// web3 = new Web3(provider);
 
-//http://localhost:2018/eoa?useraddress=0xb758c38326Df3D75F1cf0DA14Bb8220Ca4231e74&entityaddress=0x7a3E2f3A866d9fa9621c6807d9af12Dd9124aFE6
-router.get("/", function (req, res, next) {
+//http://localhost:2018/eoa/check/membership?useraddress=0xb758c38326Df3D75F1cf0DA14Bb8220Ca4231e74&entityaddress=0x7a3E2f3A866d9fa9621c6807d9af12Dd9124aFE6
+router.get("/check/membership", function (req, res, next) {
     if ("useraddress" in req.query && "entityaddress" in req.query) {
         var entityAddress = req.query["entityaddress"];
         var userAddress = req.query["useraddress"];
@@ -56,7 +56,7 @@ router.get("/", function (req, res, next) {
 });
 
 
-router.get("/history", async function (req, res, next) {
+router.get("/poll/activity", async function (req, res, next) {
     if ("useraddress" in req.query && "polladdress" in req.query) {
         var pollAddress = req.query["polladdress"];
         var userAddress = req.query["useraddress"];
@@ -128,7 +128,7 @@ router.get("/history", async function (req, res, next) {
     }
 });
 
-router.post("/check/membership", multer.single("file"), async function (req, res, next) {
+router.post("/check/vbsmembership", multer.single("file"), async function (req, res, next) {
     if (!req.file || !req.query.useraddress) {
         res.status(400).send("No file uploaded.");
         return;
@@ -209,9 +209,7 @@ router.post("/check/membership", multer.single("file"), async function (req, res
         
     }
 
-    console.log(eval(fileData["equation"]))
-
-
+    res.send({ message: 'Success', data: eval(fileData["equation"]) })
 
     res.send(fileData)
 })

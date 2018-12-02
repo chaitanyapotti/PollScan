@@ -1,21 +1,5 @@
 [
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
-                "name": "_to",
-                "type": "address"
-            },
-            {
-                "indexed": false,
-                "name": "attributeIndexes",
-                "type": "uint256[]"
-            }
-        ],
-        "name": "Assigned",
-        "type": "event"
-    },
+    
     {
         "constant": true,
         "inputs": [
@@ -35,6 +19,24 @@
         "stateMutability": "view",
         "type": "function"
     },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "name": "_to",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "name": "attributeIndexes",
+                "type": "uint256[]"
+            }
+        ],
+        "name": "Assigned",
+        "type": "event"
+    },
+
     {
         "anonymous": false,
         "inputs": [
