@@ -21,7 +21,7 @@ router.get("/identify", async (req, res, next) => {
           data: "eoa"
         });
       } else {
-        const pollInstance = await contractInstance("pollScanABI", req.query.address, req.query.network, true);
+        const pollInstance = await contractInstance("pollScanABI", req.query.address, req.query.network);
         pollInstance.methods
           .getPollType()
           .call()
@@ -29,10 +29,9 @@ router.get("/identify", async (req, res, next) => {
             return res.json({ message: "Success", data: "poll" });
           })
           .catch(err => {
-            console.error(err);
             notPoll = true;
           });
-        const entityInstance = await contractInstance("entityABI", req.query.address, req.query.network, true);
+        const entityInstance = await contractInstance("entityABI", req.query.address, req.query.network);
         entityInstance.methods
           .supportsInterface("0x01ffc9a7")
           .call()

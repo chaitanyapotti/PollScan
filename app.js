@@ -15,7 +15,7 @@ var bodyParser = require("body-parser");
 //   testnet
 // );
 
-global.contractInstances = {};
+// global.contractInstances = {};
 
 var index = require("./routes/index");
 var pollscan = require("./routes/pollscan");
@@ -66,8 +66,8 @@ app.use(function(err, req, res, next) {
   res.render("error");
 });
 
-setTimeout(() => {
-  global.contractInstances = {};
-}, 300 * 1000);
+// setTimeout(() => {
+//   global.contractInstances = {};
+// }, 300 * 1000);
 
 module.exports = app;

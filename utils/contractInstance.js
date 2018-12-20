@@ -1,25 +1,19 @@
 const web3Read = require("./web3Read");
 const getContractDetails = require("./getContractDetails");
 
-module.exports = (name, address, network, cache = false) => {
+module.exports = (name, address, network) => {
   return new Promise((resolve, reject) => {
     const web3 = web3Read(network);
-    if (address in global.contractInstances && !cache) {
-      const contractInstance = global.contractInstances[address];
-      resolve(contractInstance);
-    } else {
-      getContractDetails(name)
-        .then(response => {
-          const isCheckSummed = web3.utils.checkAddressChecksum(address);
-          if (!isCheckSummed) {
-            reject(new Error("Not a valid address"));
-          } else {
-            const contractInstance = new web3.eth.Contract(response, address);
-            global.contractInstances[address] = contractInstance;
-            resolve(contractInstance);
-          }
-        })
-        .catch(err => reject(err.message));
-    }
+    getContractDetails(name)
+      .then(async response => {
+        try {
+          const checkAddress = await web3.utils.toChecksumAddress(address);
+          const contractInstance = new web3.eth.Contract(response, checkAddress);
+          resolve(contractInstance);
+        } catch (error) {
+          reject(error.message);
+        }
+      })
+      .catch(err => reject(err.message));
   });
 };
