@@ -1,47 +1,53 @@
-var express = require("express");
-var fs = require("fs");
-var router = express.Router();
+const express = require("express");
+const router = express.Router();
+const contractInstance = require("../utils/contractInstance");
+const web3Read = require("../utils/web3Read");
 
-const pollscan_abi = JSON.parse(fs.readFileSync("./ABIs/pollScanABI.json"));
-const entity_abi = JSON.parse(fs.readFileSync("./ABIs/entityABI.json"));
 /* GET home page. */
-router.get("/", function(req, res, next) {
-  res.render("index", { title: "Express" });
+router.get("/", (req, res, next) => {
+  res.status(200).send({ title: "Welcome to PollScan backend." });
 });
 
-router.get("/identify", async function(req, res, next) {
-  var notPoll = false;
-  var notEntity = false;
-  if ("address" in req.query) {
+router.get("/identify", async (req, res, next) => {
+  let notPoll = false;
+  let notEntity = false;
+  if ("address" in req.query && "network" in req.query) {
     try {
-      var code = await web3.eth.getCode(req.query.address);
+      const web3 = web3Read(req.query.network);
+      const code = await web3.eth.getCode(req.query.address);
       if (code === "0x" || code === "0x0") {
         res.send({
           message: "Success",
           data: "eoa"
         });
       } else {
-        var pollInstance = new web3.eth.Contract(pollscan_abi, req.query.address);
-        pollInstance.methods.getPollType().call(function(err, result) {
-          if (err) {
+        const pollInstance = await contractInstance("pollScanABI", req.query.address, req.query.network, true);
+        pollInstance.methods
+          .getPollType()
+          .call()
+          .then(result => {
+            return res.json({ message: "Success", data: "poll" });
+          })
+          .catch(err => {
             console.error(err);
-            // res.status(500).json({ message: "Failed", reason: err });
             notPoll = true;
-          } else {
-            res.json({ message: "Success", data: "poll" });
-            return;
-          }
-        });
-        var entityInstance = new web3.eth.Contract(entity_abi, req.query.address);
-        entityInstance.methods.supportsInterface("0x01ffc9a7").call(function(err, result) {
-          if (err) {
+          });
+        const entityInstance = await contractInstance("entityABI", req.query.address, req.query.network, true);
+        entityInstance.methods
+          .supportsInterface("0x01ffc9a7")
+          .call()
+          .then(result => {
+            if (result) return res.json({ message: "Success", data: "entity" });
+            else
+              res.status(400).json({
+                message: "Failed",
+                reason: "Not an Entity"
+              });
+          })
+          .catch(err => {
             console.error(err);
             notEntity = true;
-          } else {
-            res.json({ message: "Success", data: "entity" });
-            return;
-          }
-        });
+          });
       }
     } catch (err) {
       console.log(err);

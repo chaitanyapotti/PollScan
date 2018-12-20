@@ -1,41 +1,30 @@
-var express = require("express");
-var router = express.Router();
-var fs = require("fs");
-
-const entity_abi = JSON.parse(fs.readFileSync("./ABIs/entityABI.json"));
+const express = require("express");
+const router = express.Router();
+const contractInstance = require("../utils/contractInstance");
+const web3Read = require("../utils/web3Read");
 
 //http://localhost:2018/entity/events?address=0x7a3E2f3A866d9fa9621c6807d9af12Dd9124aFE6
-router.get("/events", function(req, res, next) {
-  if ("address" in req.query) {
-    var entityContractAddress = req.query["address"];
-    if (entityContractAddress in global.contractInstances) {
-      var contractInstance = global.contractInstances[entityContractAddress];
-    } else {
-      var contractInstance = new web3.eth.Contract(entity_abi, entityContractAddress);
-      global.contractInstances[entityContractAddress] = contractInstance;
-    }
-    contractInstance.getPastEvents({ fromBlock: 0, toBlock: "latest" }, function(err, logs) {
-      if (err) {
-        console.log("printing error: ", err);
-        res.status(500).json({ message: "Failed", reason: err.message });
-        return;
-      }
-      let addressData = {};
-      let attributesData = {};
-      let attributeDataHeaderKeys = {};
-      let attributeHeaders = [];
-      // console.log('logs: ', logs)
-      if (logs.length > 0) {
-        getFirstAndLastBlockTimeStamp = async () => {
+router.get("/events", async (req, res, next) => {
+  if ("address" in req.query && "network" in req.query) {
+    const web3 = web3Read(req.query.network);
+    const instance = await contractInstance("entityABI", req.query.address, req.query.network);
+    const startBlockNumber = req.query.network === "main" ? "6500000" : "3000000";
+    instance
+      .getPastEvents("allEvents", { filter: {}, fromBlock: startBlockNumber, toBlock: "latest" })
+      .then(async logs => {
+        let addressData = {};
+        let attributesData = {};
+        let attributeDataHeaderKeys = {};
+        let attributeHeaders = [];
+        if (logs.length > 0) {
           try {
             let firstBlockDetails = await web3.eth.getBlock(logs[0]["blockNumber"]);
             let lastBlockDetails = await web3.eth.getBlock(logs[logs.length - 1]["blockNumber"]);
 
-            let attributeNames = await contractInstance.methods.getAttributeNames().call();
-            // console.log(attributeNames)
-
-            for (let i in attributeNames) {
-              let attributeOptions = await contractInstance.methods.getAttributeCollection(attributeNames[i]).call();
+            let attributeNames = await instance.methods.getAttributeNames().call();
+            for (let i = 0; i < attributeNames.length; i++) {
+              console.log(attributeNames[i]);
+              let attributeOptions = await instance.methods.getAttributeExhaustiveCollection(i).call();
               let temp = [];
               for (let j in attributeOptions) {
                 temp.push(web3.utils.toAscii(attributeOptions[j]).replace(/\0/g, ""));
@@ -44,10 +33,6 @@ router.get("/events", function(req, res, next) {
               attributeDataHeaderKeys[web3.utils.toAscii(attributeNames[i]).replace(/\0/g, "")] = temp;
               attributeHeaders.push(web3.utils.toAscii(attributeNames[i]).replace(/\0/g, ""));
             }
-
-            console.log(attributesData, attributeHeaders, attributeDataHeaderKeys);
-
-            // console.log(firstBlockDetails, lastBlockDetails)
             let activitiesArray = [];
             let m;
             let b;
@@ -60,7 +45,6 @@ router.get("/events", function(req, res, next) {
             }
 
             for (let log of logs) {
-              // console.log("printing event type: ", log)
               if (log["event"]) {
                 switch (log["event"]) {
                   case "Assigned": {
@@ -166,12 +150,14 @@ router.get("/events", function(req, res, next) {
             console.log(err);
             res.json({ message: "Failed", reason: "No logs available at the moment." });
           }
-        };
-        getFirstAndLastBlockTimeStamp();
-      } else {
-        res.json({ message: "Failed", reason: "No logs available at the moment." });
-      }
-    });
+        } else {
+          res.json({ message: "Failed", reason: "No logs available at the moment." });
+        }
+      })
+      .catch(err => {
+        console.log("printing error: ", err);
+        return res.status(500).json({ message: "Failed", reason: err.message });
+      });
   } else {
     res.status(500).json({
       message: "Failed",

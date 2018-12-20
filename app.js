@@ -3,19 +3,18 @@ var path = require("path");
 var logger = require("morgan");
 var cookieParser = require("cookie-parser");
 var bodyParser = require("body-parser");
-const Web3 = require("web3");
-const HDWalletProvider = require("truffle-hdwallet-provider");
-// const testnet = `https://rinkeby.infura.io/v3/894765ed26c2470587b00e37249612e4`
-const testnet = "http://localhost:8545";
+// const Web3 = require("web3");
+// const HDWalletProvider = require("truffle-hdwallet-provider");
+// // const testnet = `https://rinkeby.infura.io/v3/894765ed26c2470587b00e37249612e4`
+// const testnet = "http://localhost:8545";
 
-const provider = new HDWalletProvider(
-  // "blue inherit drum enroll amused please camp false estate flash sell right", //potti's
-  // process.env.ACCOUNT_WORDS,
-  "rookie cross around replace trim garden before ancient manage arena bar rigid",
-  testnet
-);
+// const provider = new HDWalletProvider(
+//   // "blue inherit drum enroll amused please camp false estate flash sell right", //potti's
+//   // process.env.ACCOUNT_WORDS,
+//   "rookie cross around replace trim garden before ancient manage arena bar rigid",
+//   testnet
+// );
 
-web3 = new Web3(provider);
 global.contractInstances = {};
 
 var index = require("./routes/index");
@@ -66,5 +65,9 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render("error");
 });
+
+setTimeout(() => {
+  global.contractInstances = {};
+}, 300 * 1000);
 
 module.exports = app;
